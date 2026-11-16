@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clustering, visually</title>
+  <meta name="description" content="Step through k-means (assign, update,
+    repeat) and Ward's method (merge the cheapest pair) on 2-d data, with a
+    log of every move, the WCSS by step and a dendrogram; then Ward's method
+    on a picture, merging touching pixels into superpixels.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='9' cy='10' r='3.4' fill='%232563eb'/%3E%3Ccircle cx='13' cy='15' r='3.4' fill='%232563eb'/%3E%3Ccircle cx='22' cy='9' r='3.4' fill='%23ea580c'/%3E%3Ccircle cx='20' cy='23' r='3.4' fill='%2316a34a'/%3E%3Ccircle cx='25' cy='21' r='3.4' fill='%2316a34a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Clustering, visually</h1>
+    <p class="sub">No labels, just samples: group them so each sample sits
+      close to its cluster's mean. Watch k-means and Ward's method do it one
+      step at a time.</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-mode="kmeans">k-means</button>
+      <button class="tab" role="tab" data-mode="ward">Ward's method</button>
+      <button class="tab" role="tab" data-mode="image">Ward's on a
+        picture</button>
+    </nav>
+  </header>
+
+  <section class="intro card">
+    <div data-show="kmeans">
+      <h2>k-means</h2>
+      <p class="goal"><b>Goal:</b> split the samples into <i>k</i> clusters
+        <i>C</i><sub>1</sub>, ..., <i>C<sub>k</sub></i> with each sample
+        close to its cluster's mean <i>&mu;<sub>j</sub></i> (its centroid):
+        the smallest within-cluster sum of squares.</p>
+      <p class="goal approach"><b>Approach:</b> (Lloyd) start from <i>k</i>
+        means, then alternate two steps until no sample switches cluster.
+        Neither step can raise WCSS, so it always stops, though not always
+        at the best clustering.</p>
+      <div class="formula">
+        WCSS = &sum;<sub><i>j</i></sub> &sum;<sub><i>x<sub>i</sub></i>
+        &isin; <i>C<sub>j</sub></i></sub> &#8214;<i>x<sub>i</sub></i>
+        &minus; <i>&mu;<sub>j</sub></i>&#8214;<sup>2</sup>
+      </div>
+      <div class="formula small">
+        <b>assign:</b> <i>x<sub>i</sub></i> joins the <i>C<sub>j</sub></i>
+        with the smallest &#8214;<i>x<sub>i</sub></i> &minus;
+        <i>&mu;<sub>j</sub></i>&#8214;<sup>2</sup>
+        <span class="implies">&rArr;</span>
+        <b>update:</b> <i>&mu;<sub>j</sub></i> =
+        <span class="frac"><span>1</span><span><i>N<sub>j</sub></i></span></span>
+        &sum;<sub><i>x<sub>i</sub></i> &isin; <i>C<sub>j</sub></i></sub>
+        <i>x<sub>i</sub></i>
+      </div>
+      <p class="muted"><i>N<sub>j</sub></i> is the number of samples in
+        <i>C<sub>j</sub></i>. The shading shows which mean is nearest
+        everywhere: the regions the next assign step uses.</p>
+    </div>
+
+    <div data-show="ward">
+      <h2>Ward's method</h2>
+      <p class="goal"><b>Goal:</b> a hierarchy of clusterings, from every
+        sample alone (<i>N</i> clusters) down to one cluster, each made from
+        the one before by merging two clusters.</p>
+      <p class="goal approach"><b>Approach:</b> (Ward 1963) start with
+        each sample its own cluster, total WCSS 0. Repeat: merge the two
+        clusters whose merge raises the total WCSS least.</p>
+      <div class="formula">
+        &Delta;WCSS(<i>A</i>, <i>B</i>) =
+        <span class="frac"><span><i>N<sub>A</sub></i>
+        <i>N<sub>B</sub></i></span><span><i>N<sub>A</sub></i> +
+        <i>N<sub>B</sub></i></span></span>
+        &#8214;<i>&mu;<sub>A</sub></i> &minus;
+        <i>&mu;<sub>B</sub></i>&#8214;<sup>2</sup>
+      </div>
+      <p class="muted">The dendrogram joins two clusters with a bar at the
+        total WCSS after their merge. Cut across at any height: the branches
+        below the cut are the clusters. (scipy draws its bars at
+        &radic;(2 &Delta;WCSS) instead: same tree, different heights.)</p>
+    </div>
+
+    <div data-show="image">
+      <h2>Ward's method on a picture</h2>
+      <p class="goal"><b>Goal:</b> describe the picture with <i>N</i>
+        superpixels: patches painted one color each, as close as possible to
+        the pixels' true colors.</p>
+      <p class="goal approach"><b>Approach:</b> each pixel is a sample, its
+        color <i>x<sub>i</sub></i> = (red, green, blue), each from 0 to 1.
+        Ward's method merges the cheapest pair, but only of regions that
+        touch, so every cluster is one connected patch.</p>
+      <div class="formula">
+        merge the touching <i>A</i>, <i>B</i> with the smallest
+        <span class="frac"><span><i>N<sub>A</sub></i>
+        <i>N<sub>B</sub></i></span><span><i>N<sub>A</sub></i> +
+        <i>N<sub>B</sub></i></span></span>
+        &#8214;<i>&mu;<sub>A</sub></i> &minus;
+        <i>&mu;<sub>B</sub></i>&#8214;<sup>2</sup>
+      </div>
+      <p class="muted">One run gives every <i>N</i> at once: the slider just
+        stops the merges early. Everything runs in your browser; an
+        uploaded picture never leaves your computer.</p>
+    </div>
+
+    <div>
+      <h3>Try this</h3>
+      <ul class="try" data-show="kmeans">
+        <li>On <em>three blobs</em>, press <em>Play</em> and watch the WCSS
+          chart. Does WCSS ever go up?
+          <details class="answer"><summary>Answer</summary>Never. Assign
+            gives each sample its smallest squared distance among the means;
+            update moves each mean to its cluster's average, the point with
+            the smallest sum of squared distances to the cluster. Both steps
+            can only lower the total, so the run must stop.</details>
+        </li>
+        <li>Now pick the start <em>two in one blob</em> and play. Where does
+          it stop?
+          <details class="answer"><summary>Answer</summary>With one blob
+            split in two and the other two blobs sharing one mean. No sample
+            wants to switch, so k-means is stuck: a local minimum, with a
+            higher WCSS than a good run (compare in <em>Finished
+            runs</em>). The fix: run from several starts and keep the lowest
+            WCSS, or start with k-means++.</details>
+        </li>
+        <li>Pick <em>lesson 22 ICA</em> and run both starts. Which is
+          better?
+          <details class="answer"><summary>Answer</summary>The ICA start
+            stops at WCSS 7.33, the extra start at 9.5. Both converged; only
+            the start differs.</details>
+        </li>
+        <li>On <em>how many?</em>, run each <i>k</i> from 1 to 8 (press
+          <em>New start</em> a few times for each). Where is the elbow in
+          <em>Finished runs</em>?
+          <details class="answer"><summary>Answer</summary>Around 4 or 5:
+            two of the five blobs nearly touch, so 4 and 5 are both fair
+            answers. WCSS always falls as <i>k</i> grows (at <i>k</i> =
+            <i>N</i> it is 0), so look for where it stops falling
+            fast.</details>
+        </li>
+        <li>Try <em>stretched</em>, <em>moons</em> and <em>rings</em>. Does
+          k-means find the shapes you see?
+          <details class="answer"><summary>Answer</summary>No. The
+            boundary between two clusters is the line halfway between their
+            means (the shading), so every cluster is a convex region around
+            its mean. On <em>stretched</em>, cutting across the bars gives a
+            lower WCSS than the bars themselves: k-means is not wrong about
+            WCSS, WCSS is the wrong goal for these shapes.</details>
+        </li>
+        <li>On <em>one big, two small</em>, press <em>New start</em> a few
+          times with <em>k-means++</em>. Where do the big blob's edge
+          samples go?
+          <details class="answer"><summary>Answer</summary>In the best runs
+            (lowest WCSS), to the small clusters: a boundary sits halfway
+            between two means no matter how spread out each cluster is, so
+            the tight clusters claim the big one's edge. Other starts stop
+            with the big blob cut in half and the two small ones sharing a
+            mean. The three true groups have a higher WCSS than
+            both.</details>
+        </li>
+        <li>Drag a mean to make your own start, then hover any log line to
+          see that move on the plot.</li>
+      </ul>
+      <ul class="try" data-show="ward">
+        <li>On <em>lesson 22 walk</em>, step through. Where do the bars
+          land?
+          <details class="answer"><summary>Answer</summary>At total WCSS 2,
+            6, 14 and 30, as in the lesson: {<i>x</i>₂, <i>x</i>₃}, then
+            {<i>x</i>₄, <i>x</i>₅}, then those two, then <i>x</i>₁ last.
+            </details>
+        </li>
+        <li>On <em>three blobs</em> (log axis), find the tallest gap
+          between bars and drag the cut into it. How many clusters?
+          <details class="answer"><summary>Answer</summary>Three. The next
+            merge would multiply the total WCSS by more than 5: it joins two
+            groups that really are apart. On the log axis, equal gaps are
+            equal ratios.</details>
+        </li>
+        <li>Hover the merges late in the log. Is the cheapest pair always
+          the pair with the closest means?
+          <details class="answer"><summary>Answer</summary>No. The factor
+            <i>N<sub>A</sub></i> <i>N<sub>B</sub></i> /
+            (<i>N<sub>A</sub></i> + <i>N<sub>B</sub></i>) grows with the
+            clusters' sizes: two big clusters cost more to merge than two
+            single samples the same distance apart, since merging moves the
+            mean of every sample in both.</details>
+        </li>
+        <li>Switch the dendrogram to <em>linear</em>. Why is log the
+          default?
+          <details class="answer"><summary>Answer</summary>Total WCSS grows
+            quickly: the last few merges dwarf the rest, and on a linear
+            axis the first dozens of merges are flat on the floor.</details>
+        </li>
+        <li>Try <em>moons</em>, <em>rings</em> and <em>no clusters</em>.
+          <details class="answer"><summary>Answer</summary>Like k-means,
+            Ward's looks for compact, round clusters, so it cuts the moons
+            and rings across. On <em>no clusters</em> there is no tall gap:
+            no number of clusters stands out.</details>
+        </li>
+      </ul>
+      <ul class="try" data-show="image">
+        <li>Slide <i>N</i> down from every pixel. How few superpixels before
+          the picture stops being recognizable? Press and hold the picture
+          to compare with the original.</li>
+        <li>Turn on outlines at <i>N</i> = 50. Where are the superpixels
+          small, and where big?
+          <details class="answer"><summary>Answer</summary>Small where the
+            color changes fast (eyes, edges, text), big where it is smooth
+            (background, fur). A merge in a smooth area costs little WCSS,
+            so Ward's makes those first.</details>
+        </li>
+        <li>Why only merge regions that touch?
+          <details class="answer"><summary>Answer</summary>Without the rule,
+            Ward's would group same-colored pixels from anywhere: <i>N</i>
+            colors for the whole picture, not <i>N</i> patches. With it, two
+            eyes of the same color stay two regions, and each region is a
+            piece of the picture.</details>
+        </li>
+        <li>Look at the chart. Where does the total WCSS climb fastest?
+          <details class="answer"><summary>Answer</summary>At the last few
+            merges, which join big regions of different colors. Merging
+            thousands of near-identical neighbors early on is nearly
+            free.</details>
+        </li>
+        <li>Upload a picture of your own.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================== k-means tab -->
+  <main class="panel" data-show="kmeans">
+    <div class="stage card">
+      <div class="stage-head">
+        <span class="key"><i class="dot c"></i><span>sample, colored by
+          cluster (gray: none yet)</span></span>
+        <span class="key"><i class="meank"></i><span>mean
+          <i>&mu;<sub>j</sub></i> (drag to start over from
+          there)</span></span>
+        <label class="check"><input type="checkbox" id="k-vor"
+          checked><span>nearest-mean regions</span></label>
+      </div>
+      <svg id="k-plane" viewBox="0 0 700 700" aria-label="samples, means and
+        nearest-mean regions"></svg>
+      <p class="hint">Hover a line of the log, or a dot on the WCSS chart, to
+        see what that step did.</p>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>Data and start</h2>
+        <div class="seg wrap" id="k-sets"></div>
+        <label class="slider"><span>clusters <i>k</i></span>
+          <span class="pair"><input type="range" id="k-k" min="1" max="8"
+            step="1"><b id="k-kv"></b></span></label>
+        <h3>Starting means</h3>
+        <div class="seg wrap" id="k-init"></div>
+        <div class="buttons"><button id="k-new">New start</button></div>
+      </div>
+
+      <div class="card readout">
+        <div class="buttons run">
+          <button id="k-play" class="primary">Play</button>
+          <button id="k-step">Step</button>
+          <button id="k-back">Back</button>
+          <button id="k-reset">Restart</button>
+        </div>
+        <div class="speed"><span class="muted">speed</span>
+          <div class="seg" id="k-speed"></div></div>
+        <div id="k-read"></div>
+      </div>
+
+      <div class="card">
+        <h3>Log</h3>
+        <div class="log" id="k-log"></div>
+      </div>
+
+      <div class="card">
+        <h3>WCSS by step</h3>
+        <svg id="k-chart" class="chart" viewBox="0 0 460 180"
+          aria-label="WCSS after each step"></svg>
+        <p class="muted"><span class="dot assign"></span>after assign
+          <span class="dot update"></span>after update</p>
+      </div>
+
+
+      <div class="card">
+        <h3>Finished runs: final WCSS by <i>k</i></h3>
+        <svg id="k-runs" class="chart" viewBox="0 0 460 190"
+          aria-label="final WCSS of each finished run against k"></svg>
+        <p class="muted"><span id="k-runs-note"></span>
+          <button id="k-clear" class="small">Clear</button></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================================================== Ward's tab -->
+  <main class="panel" data-show="ward">
+    <div class="stage card">
+      <div class="stage-head">
+        <span class="key"><i class="dot c"></i><span>sample, colored by
+          cluster (gray: still alone)</span></span>
+        <label class="check"><input type="checkbox" id="w-next"
+          checked><span>next merge (dashed)</span></label>
+        <label class="check"><input type="checkbox" id="w-means"
+          checked><span>means &times;</span></label>
+      </div>
+      <svg id="w-plane" viewBox="0 0 700 700" aria-label="samples grouped
+        into the current clusters"></svg>
+      <p class="hint">Hover a log line or a dendrogram branch to see that
+        merge: the two clusters, their means and the &Delta;WCSS.</p>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>Data</h2>
+        <div class="seg wrap" id="w-sets"></div>
+      </div>
+
+      <div class="card readout">
+        <div class="buttons run">
+          <button id="w-play" class="primary">Play</button>
+          <button id="w-step">Step</button>
+          <button id="w-back">Back</button>
+          <button id="w-reset">Restart</button>
+          <button id="w-end">To the end</button>
+        </div>
+        <div class="speed"><span class="muted">speed</span>
+          <div class="seg" id="w-speed"></div></div>
+        <div id="w-read"></div>
+      </div>
+
+      <div class="card">
+        <div class="h3row"><h3>Dendrogram</h3>
+          <div class="seg" id="w-scale"></div></div>
+        <svg id="w-den" class="chart pickv" viewBox="0 0 460 380"
+          aria-label="dendrogram, bars at the total WCSS after each
+          merge"></svg>
+        <p class="muted">Drag up and down to move the cut. Faint branches are
+          merges still to come.</p>
+      </div>
+
+      <div class="card">
+        <h3>Log</h3>
+        <div class="log" id="w-log"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================================================== image tab -->
+  <main class="panel" data-show="image">
+    <div class="stage card">
+      <canvas id="i-canvas" aria-label="the picture as superpixels"></canvas>
+      <p class="hint" id="i-hover"></p>
+      <p class="hint">Press and hold the picture to see the original.</p>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>Picture</h2>
+        <div class="pics" id="i-pics"></div>
+        <div class="buttons">
+          <label class="upload"><input type="file" id="i-file"
+            accept="image/*"><span>Upload your own</span></label>
+          <span class="muted" id="i-fname"></span>
+        </div>
+        <div class="speed"><span class="muted">pixels on the long
+          side</span><div class="seg" id="i-res"></div></div>
+      </div>
+
+      <div class="card readout">
+        <label class="slider"><span>superpixels <i>N</i></span>
+          <span class="pair"><input type="range" id="i-n" min="0"
+            max="1000" step="1"><input type="number" id="i-nv"
+            min="1"></span></label>
+        <div class="buttons" id="i-quick">
+          <button data-n="2">2</button><button data-n="10">10</button>
+          <button data-n="50">50</button><button data-n="250">250</button>
+          <button data-n="1000">1000</button>
+          <button id="i-play" class="primary">Play</button>
+        </div>
+        <label class="check"><input type="checkbox" id="i-lines"><span>outline
+          the superpixels</span></label>
+        <div id="i-read"></div>
+        <p class="muted" id="i-time"></p>
+      </div>
+
+      <div class="card">
+        <h3>Total WCSS (log) by <i>N</i></h3>
+        <svg id="i-chart" class="chart pick" viewBox="0 0 460 230"
+          aria-label="total WCSS against the number of superpixels"></svg>
+        <p class="muted">Click or drag to set <i>N</i>. Read right to left:
+          that is the order Ward's merges in.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Part of the DS 4400 &ldquo;visually&rdquo; demos.
+    &middot;
+    <a href="https://github.com/matthigger/clustering">Source on GitHub</a>
+    &middot;
+    <span id="build"></span>
+  </footer>
+
+  <script src="js/version.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/images.js"></script>
+  <script src="js/cluster.js"></script>
+  <script src="js/kmeans.js"></script>
+  <script src="js/ward.js"></script>
+  <script src="js/imgward.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

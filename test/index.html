@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>engine check</title>
+  <!-- Engine check: js/cluster.js against test/ref.js (build/make_ref.py)
+       and the lesson 22 numbers. The title ends PASS or FAIL. -->
+</head>
+<body>
+  <pre id="out"></pre>
+  <script src="../js/version.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/cluster.js"></script>
+  <script src="ref.js"></script>
+  <script>
+    const lines = [];
+    let bad = 0;
+    function check(name, ok, info = "") {
+      if (!ok) bad++;
+      lines.push(`${ok ? "ok  " : "FAIL"} ${name}${info ? "  " + info : ""}`);
+    }
+    const close = (a, b, tol = 1e-8) =>
+      Math.abs(a - b) <= tol * Math.max(1, Math.abs(b));
+
+    /** Lloyd's from mu0 until no sample switches; final means and WCSS. */
+    function lloyd(X, mu0) {
+      let mu = mu0.map(m => [...m]), assign = X.map(() => -1);
+      for (let it = 0; it < 1000; it++) {
+        const a = kmAssign(X, mu, assign);
+        if (it > 0 && a.events.length === 0) break;
+        assign = a.assign;
+        mu = kmUpdate(X, mu, assign, makeRng(1)).mu;
+      }
+      return { mu, wcss: kmWcss(X, mu, assign) };
+    }
+
+    REF.kmeans.forEach((c, i) => {
+      const r = lloyd(c.X, c.mu0);
+      const err = Math.max(...r.mu.flatMap((m, j) =>
+        m.map((v, d) => Math.abs(v - c.mu[j][d]))));
+      check(`k-means ${i} vs sklearn: means`, err < 1e-9, `max err ${err}`);
+      check(`k-means ${i} vs sklearn: WCSS`, close(r.wcss, c.wcss),
+        `${r.wcss} vs ${c.wcss}`);
+    });
+
+    REF.ward.forEach((c, i) => {
+      const tot = wardTree(c.X).map(m => m.total);
+      const ok = tot.every((v, t) => close(v, c.total[t], 1e-9));
+      check(`Ward ${i} (n = ${c.X.length}) vs scipy: total WCSS by merge`,
+        ok, `final ${tot.at(-1)} vs ${c.total.at(-1)}`);
+    });
+
+    REF.grid.forEach((c, i) => {
+      const F = Float64Array.from(c.F), n = c.w * c.h;
+      const m = wardGrid(F, c.w, c.h, 3);
+      const ok = [...m.total].every((v, t) => close(v, c.total[t], 1e-9));
+      check(`grid Ward ${i} (${c.w} x ${c.h}) vs brute force`, ok);
+      let allOk = true;
+      for (const N of [1, 2, 5, Math.floor(n / 2)]) {
+        const lab = gridLabels(n, m, n - N), acc = new Map();
+        for (let p = 0; p < n; p++) {
+          let a = acc.get(lab[p]);
+          if (!a) acc.set(lab[p], a = [0, 0, 0, 0, 0]);
+          for (let d = 0; d < 3; d++) {
+            a[d] += F[3 * p + d];
+            a[4] += F[3 * p + d] ** 2;
+          }
+          a[3]++;
+        }
+        let w = 0;
+        for (const a of acc.values()) {
+          w += a[4] - (a[0] ** 2 + a[1] ** 2 + a[2] ** 2) / a[3];
+        }
+        const tot = N === n ? 0 : m.total[n - N - 1];
+        allOk = allOk && acc.size === N && close(w, tot, 1e-7);
+      }
+      check(`grid Ward ${i}: labels give N regions with that WCSS`, allOk);
+    });
+
+    const walk = wardTree([[0, 1], [3, 3], [3, 5], [4, 1], [6, 3]]);
+    check("lesson 22 Ward walk: totals 2, 6, 14, 30",
+      walk.map(m => m.total).join() === "2,6,14,30",
+      walk.map(m => m.total).join());
+    const ica = [[1, 1], [2, 0], [2, 2], [4, 2], [6, 1], [6, 3]];
+    const a = lloyd(ica, [[1, 1], [2, 0]]).wcss;
+    const b = lloyd(ica, [[2, 2], [6, 1]]).wcss;
+    check("lesson 22 ICA: starts stop at 7.33 and 9.5",
+      close(a, 22 / 3) && close(b, 9.5), `${a}, ${b}`);
+
+    document.getElementById("out").textContent = lines.join("\n");
+    document.title = bad ? `FAIL (${bad})` : "PASS";
+  </script>
+</body>
+</html>
