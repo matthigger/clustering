@@ -257,8 +257,30 @@ function row(label, val) {
     val}</span></div>`;
 }
 
+/** Transport icons (16 x 16, VCR style) as inline SVG. */
+const ICON = Object.fromEntries(Object.entries({
+  play: "M4 2.5v11l9-5.5z",
+  pause: "M3.5 2.5h3.2v11H3.5zM9.3 2.5h3.2v11H9.3z",
+  step: "M2.5 2.5v11L10 8zM11 2.5h2.6v11H11z",
+  back: "M13.5 2.5v11L6 8zM2.4 2.5H5v11H2.4z",
+  start: "M1.8 2.5h2.3v11H1.8zM9.2 2.5v11L4.6 8zM14.6 2.5v11L10 8z",
+  end: "M11.9 2.5h2.3v11h-2.3zM6.8 2.5v11L11.4 8zM1.4 2.5v11L6 8z",
+}).map(([k, d]) => [k, `<svg class="ic" viewBox="0 0 16 16"
+  aria-hidden="true"><path d="${d}"/></svg>`]));
+
+for (const b of document.querySelectorAll("[data-icon]")) {
+  b.innerHTML = ICON[b.dataset.icon];
+}
+
+/** Show a play button as play or pause. */
+function playIcon(el, playing) {
+  el.innerHTML = playing ? ICON.pause : ICON.play;
+  el.title = playing ? "Pause" : "Play";
+  el.setAttribute("aria-label", el.title);
+}
+
 /** Play speeds: steps per second for the speed control. */
-const SPEEDS = [["0.5", "slow"], ["1.5", "medium"], ["5", "fast"]];
+const SPEEDS = [["0.5", "½×"], ["1.5", "1×"], ["5", "3×"]];
 
 /**
  * Drive a step function on a timer, for the Play / Pause buttons.

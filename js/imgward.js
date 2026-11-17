@@ -226,12 +226,12 @@ document.getElementById("i-lines").onchange = () => imRender();
 function imStop() {
   if (IM.anim) cancelAnimationFrame(IM.anim);
   IM.anim = null;
-  document.getElementById("i-play").textContent = "Play";
+  playIcon(document.getElementById("i-play"), false);
 }
 document.getElementById("i-play").onclick = () => {
   if (IM.anim) { imStop(); return; }
   if (IM.N <= 1) imSetN(imN());
-  document.getElementById("i-play").textContent = "Pause";
+  playIcon(document.getElementById("i-play"), true);
   let last = performance.now();
   const frame = now => {
     const dt = Math.min(now - last, 100) / 1000;

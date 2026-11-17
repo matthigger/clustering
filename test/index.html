@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>engine check</title>
   <!-- Engine check: js/cluster.js against test/ref.js (build/make_ref.py)
-       and the lesson 22 numbers. The title ends PASS or FAIL. -->
+       and hand-checked small cases. The title ends PASS or FAIL. -->
 </head>
 <body>
   <pre id="out"></pre>
@@ -78,13 +78,13 @@
     });
 
     const walk = wardTree([[0, 1], [3, 3], [3, 5], [4, 1], [6, 3]]);
-    check("lesson 22 Ward walk: totals 2, 6, 14, 30",
+    check("five points, Ward: totals 2, 6, 14, 30",
       walk.map(m => m.total).join() === "2,6,14,30",
       walk.map(m => m.total).join());
-    const ica = [[1, 1], [2, 0], [2, 2], [4, 2], [6, 1], [6, 3]];
-    const a = lloyd(ica, [[1, 1], [2, 0]]).wcss;
-    const b = lloyd(ica, [[2, 2], [6, 1]]).wcss;
-    check("lesson 22 ICA: starts stop at 7.33 and 9.5",
+    const pts = [[1, 1], [2, 0], [2, 2], [4, 2], [6, 1], [6, 3]];
+    const a = lloyd(pts, [[1, 1], [2, 0]]).wcss;
+    const b = lloyd(pts, [[2, 2], [6, 1]]).wcss;
+    check("small case, k-means: two starts stop at 7.33 and 9.5",
       close(a, 22 / 3) && close(b, 9.5), `${a}, ${b}`);
 
     document.getElementById("out").textContent = lines.join("\n");

@@ -36,18 +36,12 @@ const DATASETS = [
     starts: { "two in one blob": [[-4.6, -2.2], [-3.4, -1.8], [1.8, 0.4]] },
   },
   {
-    id: "lesson", name: "lesson 22 walk", k: 2, ward: 0,
+    id: "six", name: "six points", k: 2, ward: 0,
     gen: () => [[0, 0], [1, 1], [0, 2], [3, 2], [5, 4], [6, 4]],
-    starts: { "lesson start": [[0, 2], [1, 1]] }, init: "lesson start",
+    starts: { "fixed start": [[0, 2], [1, 1]] }, init: "fixed start",
   },
   {
-    id: "ica", name: "lesson 22 ICA", k: 2, ward: 0,
-    gen: () => [[1, 1], [2, 0], [2, 2], [4, 2], [6, 1], [6, 3]],
-    starts: { "ICA start": [[1, 1], [2, 0]],
-      "extra start": [[2, 2], [6, 1]] }, init: "ICA start",
-  },
-  {
-    id: "wardwalk", name: "lesson 22 walk", k: 2, ward: 1, kmeans: false,
+    id: "fivept", name: "five points", k: 2, ward: 1, kmeans: false,
     gen: () => [[0, 1], [3, 3], [3, 5], [4, 1], [6, 3]],
   },
   {

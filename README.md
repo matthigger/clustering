@@ -8,17 +8,19 @@ lesson 22, a companion to the other "visually" demos (e.g.
 clusters C₁, ..., Cₖ with means μⱼ and sizes Nⱼ, WCSS, and
 ΔWCSS(A, B) = N_A N_B / (N_A + N_B) ‖μ_A − μ_B‖². Three tabs:
 
-- **k-means** (`#kmeans`). Play / Step / Back alternate the two steps:
+- **k-means** (`#kmeans`). The transport buttons under the plot
+  (restart, step back, play / pause, step) alternate the two steps:
   assign each sample to its nearest mean, update each mean to its
   samples' average. Every step is logged as events (a cluster's samples
   on the first assign, a sample switching cluster, a mean moving, an
-  empty cluster restarting, the stop); hover a line, or a dot on the
-  WCSS-by-step chart, to draw it on the plot. Starts: random samples,
-  k-means++, the lesson presets, or drag a mean. Converged runs land in
-  a final-WCSS-by-k chart (elbow, local minima).
+  empty cluster restarting, the stop) in the log under the plot; hover a
+  line, or a dot on the WCSS-by-step chart, to draw it on the plot.
+  Starts: random samples, k-means++, a dataset's fixed start, or drag a
+  mean. Converged runs land in a final-WCSS-by-k chart (elbow, local
+  minima).
 - **Ward's method** (`#ward`). Plays the merges one at a time with the
   same kind of log; the dendrogram puts each bar at the total WCSS after
-  its merge (log axis by default, linear for the 5-point lesson walk)
+  its merge (log axis by default, linear for the five-point set)
   and its cut can be dragged.
 - **Ward's on a picture** (`#image`). Each pixel's color is a sample and
   only touching regions may merge, so clusters are superpixels. One run
@@ -46,9 +48,9 @@ test/smoke.sh                                      # JS errors + shots/
 compares `js/cluster.js` with sklearn's `KMeans` (Lloyd from a given
 start), scipy's Ward linkage (total WCSS after each merge) and a
 brute-force connectivity-constrained Ward's (itself checked against
-sklearn's `ward_tree`), plus the lesson 22 numbers. `run_headless.py`
-drives playwright's Chromium (`~/.cache/ms-playwright`), so run it
-outside the sandbox.
+sklearn's `ward_tree`), plus a few hand-checked small cases.
+`run_headless.py` drives playwright's Chromium (`~/.cache/ms-playwright`),
+so run it outside the sandbox.
 
 ## Run locally
 

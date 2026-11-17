@@ -1,7 +1,7 @@
 // Ward's method tab. The whole merge sequence is computed when a dataset
 // is picked; the tab shows the first t merges (Play / Step / Back, or
 // drag the cut on the dendrogram). Dendrogram bars sit at the total WCSS
-// after each merge, as in lesson 22 (scipy draws √(2 ΔWCSS) instead).
+// after each merge (scipy draws √(2 ΔWCSS) instead).
 //
 // Merge record (merge t makes node n + t; samples are nodes 0..n-1):
 //   {a, b, na, nb, muA, muB, mu, delta, total}
@@ -66,7 +66,7 @@ function wStep() {
 }
 
 const wPlay = player(wStep, playing => {
-  document.getElementById("w-play").textContent = playing ? "Pause" : "Play";
+  playIcon(document.getElementById("w-play"), playing);
 });
 
 /** Short name of node id: its samples if few, else its size. */

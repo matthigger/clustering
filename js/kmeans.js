@@ -88,7 +88,7 @@ function kStep() {
 }
 
 const kPlay = player(kStep, playing => {
-  document.getElementById("k-play").textContent = playing ? "Pause" : "Play";
+  playIcon(document.getElementById("k-play"), playing);
 });
 
 // ------------------------------------------------------------ drawing

@@ -517,3 +517,26 @@ button.small { padding: 0 8px; font-size: .8rem; margin-left: 6px; }
   .intro { margin-left: 16px; margin-right: 16px; }
   .tabs { flex-wrap: wrap; }
 }
+
+/* ------------------------------------------- transport + log under plot */
+.stage.flow { position: relative; top: 0; }
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 8px;
+}
+.transport button, #i-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 34px;
+  padding: 0 !important;
+}
+.transport .seg { margin-left: auto; flex: 0 1 180px; }
+.ic, .stage svg.ic { width: 16px; height: 16px; fill: currentColor;
+  display: block; touch-action: auto; }
+.readout #k-read + h3, .readout #w-read + .h3row { margin-top: 14px; }
+.stage .log { max-height: 260px; }
