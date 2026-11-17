@@ -279,7 +279,7 @@ segSet(document.getElementById("i-res"), "128");
 
 const imPics = document.getElementById("i-pics");
 imPics.innerHTML = Object.keys(IMAGES).map(k => `<button class="thumb"
-  data-k="${k}" aria-label="${k}"><img src="${IMAGES[k]}" alt="${k}"></button>`)
+  data-k="${k}" title="${k}" aria-label="${k}"><img src="${IMAGES[k]}" alt="${k}"></button>`)
   .join("");
 function imPick(k, url) {
   imStop();

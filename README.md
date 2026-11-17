@@ -9,7 +9,8 @@ clusters C₁, ..., Cₖ with means μⱼ and sizes Nⱼ, WCSS, and
 ΔWCSS(A, B) = N_A N_B / (N_A + N_B) ‖μ_A − μ_B‖². Three tabs:
 
 - **k-means** (`#kmeans`). The transport buttons under the plot
-  (restart, step back, play / pause, step) alternate the two steps:
+  (restart, step back, play / pause, step, run to the end) alternate the
+  two steps:
   assign each sample to its nearest mean, update each mean to its
   samples' average. Every step is logged as events (a cluster's samples
   on the first assign, a sample switching cluster, a mean moving, an
@@ -25,15 +26,21 @@ clusters C₁, ..., Cₖ with means μⱼ and sizes Nⱼ, WCSS, and
 - **Ward's on a picture** (`#image`). Each pixel's color is a sample and
   only touching regions may merge, so clusters are superpixels. One run
   gives every N; the slider (or the WCSS-by-N chart) picks N. Stock
-  pictures: the dog from the PCA demo and four scikit-image samples
-  (astronaut and rocket, public domain; chelsea the cat and coffee, CC0).
-  Uploads stay in the browser.
+  pictures: the dog from the PCA demo, scikit-image samples (astronaut,
+  rocket, coins: public domain; cat, coffee, cameraman: CC0) and Kodak
+  test images (parrots, hats, motocross, lighthouse; released for
+  unrestricted use). Uploads stay in the browser.
+
+Each dataset (both point tabs) has a few sliders (samples, spread or
+noise, a shape knob such as separation or ring radius) plus New draw
+(new seed) and Defaults; sample counts are scaled down on Ward's tab.
 
 Plain HTML/CSS/JS with SVG and canvas: no build step and no
 dependencies, so it also works offline from `file://`. The engines are
 `js/cluster.js`; datasets are `js/data.js` (seeded, the same on every
 visit); `js/images.js` holds the stock pictures as data URLs, rebuilt by
-`build/make_images.py`.
+`build/make_images.py` (it downloads the Kodak originals to the
+gitignored `build/kodak/` on first run).
 
 ## Testing
 

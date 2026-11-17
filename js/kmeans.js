@@ -44,8 +44,8 @@ function kReset(mu = null, how = null) {
   const X = K.set.X;
   let starts = null;
   if (!mu) {
-    if (K.set.starts && K.set.starts[K.init]) {
-      mu = K.set.starts[K.init].map(m => [...m]);
+    if (K.set.st && K.set.st[K.init]) {
+      mu = K.set.st[K.init].map(m => [...m]);
       how = K.init;
     } else {
       starts = (K.init === "pp" ? initPP : initRandom)(X, K.k, K.rng);
@@ -325,6 +325,7 @@ function kRead() {
     row("WCSS", st.wcss === undefined ? "no clusters yet" : fmt3(st.wcss)) +
     row("next", next);
   document.getElementById("k-step").disabled = kDone();
+  document.getElementById("k-end").disabled = kDone();
   document.getElementById("k-back").disabled = K.steps.length < 2;
 }
 
@@ -428,13 +429,13 @@ function kDrawRuns() {
 
 function kStartChoices() {
   const items = [["random", "random samples"], ["pp", "k-means++"]];
-  for (const label of Object.keys(K.set.starts || {})) {
+  for (const label of Object.keys(K.set.st || {})) {
     items.push([label, label]);
   }
   segmented(document.getElementById("k-init"), items, v => {
     K.init = v;
-    if (K.set.starts && K.set.starts[v]) {
-      K.k = K.set.starts[v].length;
+    if (K.set.st && K.set.st[v]) {
+      K.k = K.set.st[v].length;
     }
     kRestart();
   });
@@ -458,6 +459,12 @@ function kPickSet(id) {
   K.set = K.sets.find(d => d.id === id);
   K.k = K.set.k;
   K.init = K.set.init || "random";
+  paramControls(document.getElementById("k-params"), K.set, kNewData);
+  kNewData();
+}
+
+/** Refit the plot and start over after the samples change. */
+function kNewData() {
   K.plane.fit(K.set.X);
   kStartChoices();
   kRestart();
@@ -473,8 +480,8 @@ segSet(document.getElementById("k-speed"), "1.5");
 
 document.getElementById("k-k").addEventListener("input", e => {
   K.k = +e.target.value;
-  if (K.set.starts && K.set.starts[K.init] &&
-      K.set.starts[K.init].length !== K.k) {
+  if (K.set.st && K.set.st[K.init] &&
+      K.set.st[K.init].length !== K.k) {
     K.init = "random";
   }
   kRestart();
@@ -503,6 +510,10 @@ document.getElementById("k-back").onclick = () => {
   kDraw();
 };
 document.getElementById("k-reset").onclick = kRewind;
+document.getElementById("k-end").onclick = () => {
+  kPlay.pause();
+  for (let g = 0; g < 1000 && kStep(); g++);
+};
 document.getElementById("k-new").onclick = () => {
   K.seed++;
   if (K.init !== "pp") K.init = "random";

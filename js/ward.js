@@ -28,8 +28,15 @@ const wLog = document.getElementById("w-log");
 const wN = () => W.set.X.length;
 
 function wPickSet(id) {
-  wPlay.pause();
   W.set = W.sets.find(d => d.id === id);
+  segSet(document.getElementById("w-sets"), id);
+  paramControls(document.getElementById("w-params"), W.set, wNewData);
+  wNewData();
+}
+
+/** Recompute the merges and start over after the samples change. */
+function wNewData() {
+  wPlay.pause();
   const n = wN();
   W.merges = wardTree(W.set.X);
   W.col = wardColors(n, W.merges);
@@ -40,7 +47,6 @@ function wPickSet(id) {
   segSet(document.getElementById("w-scale"), W.log ? "log" : "lin");
   W.t = 0;
   W.hl = null;
-  segSet(document.getElementById("w-sets"), id);
   wDraw();
 }
 

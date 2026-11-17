@@ -540,3 +540,9 @@ button.small { padding: 0 8px; font-size: .8rem; margin-left: 6px; }
   display: block; touch-action: auto; }
 .readout #k-read + h3, .readout #w-read + .h3row { margin-top: 14px; }
 .stage .log { max-height: 260px; }
+.params { margin-top: 8px; }
+.params:empty { display: none; }
+.params .slider { grid-template-columns: 150px minmax(0, 1fr); margin: 2px 0; }
+.params .slider > span:first-child { font-size: .9rem; color: var(--muted); }
+.params .buttons { margin: 4px 0 0; }
+.pics .thumb { width: 56px; height: 56px; }
